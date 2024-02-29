@@ -26,6 +26,8 @@
 	href="<%=request.getContextPath()%>/assets/TAILWIND/tailwind-utilities.min.css" />
 <link rel="stylesheet"
 	href="<%=request.getContextPath()%>/assets/fontawesome/css/all.min.css" />
+	<link rel="stylesheet"
+	href="<%=request.getContextPath()%>/assets/css/style.css" />
 <link rel="stylesheet"
 	href="<%=request.getContextPath()%>/assets/sweetalert2/dist/sweetalert2.min.css" />
 

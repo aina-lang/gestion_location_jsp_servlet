@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
+import com.google.gson.Gson;
 import com.models.Location;
 import com.service.ResponseApi;
 
@@ -37,6 +38,31 @@ public class MyServlet extends HttpServlet {
 				|| requestURI.startsWith(req.getContextPath() + "/dashboard")) {
 			linkActive = 1;
 			req.setAttribute("linkActive", linkActive);
+
+			// Get all locations
+			List<Location> locations = LocationModel.getAllLocations();
+
+			// Calculate and set min, max, and total rent
+			double minRent = locations.stream()
+					.mapToDouble(location -> location.getTauxJournalier() * location.getNombreJours()).min()
+					.orElse(0.0);
+
+			double maxRent = locations.stream()
+					.mapToDouble(location -> location.getTauxJournalier() * location.getNombreJours()).max()
+					.orElse(0.0);
+
+			double totalRent = locations.stream()
+					.mapToDouble(location -> location.getTauxJournalier() * location.getNombreJours()).sum();
+
+			req.setAttribute("minRent", minRent);
+			req.setAttribute("maxRent", maxRent);
+			req.setAttribute("totalRent", totalRent);
+
+			// Set the locations list
+			req.setAttribute("Locations", new Gson().toJson(locations));
+
+
+			// Forward to the JSP page
 			getServletContext().getRequestDispatcher("/WEB-INF/views/pages/dashboard.jsp").forward(req, res);
 		}
 
@@ -57,8 +83,6 @@ public class MyServlet extends HttpServlet {
 
 	}
 
-
-	
 	private void viewAllLocations(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		List<Location> Locations = LocationModel.getAllLocations();
@@ -81,73 +105,71 @@ public class MyServlet extends HttpServlet {
 	}
 
 	private void addLocation(HttpServletRequest request, HttpServletResponse response)
-	        throws ServletException, IOException {
-	    try {
-	        // Récupérer les détails de la Location depuis le formulaire
-	        String carName = request.getParameter("carName");
-	        String nameLocation = request.getParameter("nameLocation");
-	        int nombreJours = Integer.parseInt(request.getParameter("nombreJours"));
-	        double tauxJournalier = Double.parseDouble(request.getParameter("tauxJournalier"));
+			throws ServletException, IOException {
+		try {
+			// Récupérer les détails de la Location depuis le formulaire
+			String carName = request.getParameter("carName");
+			String nameLocation = request.getParameter("nameLocation");
+			int nombreJours = Integer.parseInt(request.getParameter("nombreJours"));
+			double tauxJournalier = Double.parseDouble(request.getParameter("tauxJournalier"));
 
-	        // Créer une nouvelle instance de Location
-	        Location newLocation = new Location();
-	        newLocation.setCarName(carName);
-	        newLocation.setNameLocation(nameLocation);
-	        newLocation.setNombreJours(nombreJours);
-	        newLocation.setTauxJournalier(tauxJournalier);
+			// Créer une nouvelle instance de Location
+			Location newLocation = new Location();
+			newLocation.setCarName(carName);
+			newLocation.setNameLocation(nameLocation);
+			newLocation.setNombreJours(nombreJours);
+			newLocation.setTauxJournalier(tauxJournalier);
 
-	        // Ajouter la nouvelle Location au modèle
-	        LocationModel.addLocation(newLocation);
+			// Ajouter la nouvelle Location au modèle
+			LocationModel.addLocation(newLocation);
 
-	        // Créer une réponse avec un message de succès
-	        ResponseApi successResponse = new ResponseApi("Location ajoutée avec succès", 200, "Success");
+			// Créer une réponse avec un message de succès
+			ResponseApi successResponse = new ResponseApi("Location ajoutée avec succès", 200, "Success");
 
-	        request.getSession().setAttribute("responseApi", successResponse);
-	        response.sendRedirect(request.getContextPath() + "/app");
-	    } catch (NumberFormatException e) {
-	        // Créer une réponse avec un message d'erreur
-	        ResponseApi errorResponse = new ResponseApi("Erreur lors de l'ajout de la Location", 500, "Error");
+			request.getSession().setAttribute("responseApi", successResponse);
+			response.sendRedirect(request.getContextPath() + "/app");
+		} catch (NumberFormatException e) {
+			// Créer une réponse avec un message d'erreur
+			ResponseApi errorResponse = new ResponseApi("Erreur lors de l'ajout de la Location", 500, "Error");
 
-	        request.getSession().setAttribute("responseApi", errorResponse);
-	        response.sendRedirect(request.getContextPath() + "/app");
-	    }
+			request.getSession().setAttribute("responseApi", errorResponse);
+			response.sendRedirect(request.getContextPath() + "/app");
+		}
 	}
-
 
 	private void updateLocation(HttpServletRequest request, HttpServletResponse response)
-	        throws ServletException, IOException {
-	    try {
-	        String locationId = request.getParameter("id");
-	        String carName = request.getParameter("carName");
-	        String nameLocation = request.getParameter("nameLocation");
-	        int nombreJours = Integer.parseInt(request.getParameter("nombreJours"));
-	        double tauxJournalier = Double.parseDouble(request.getParameter("tauxJournalier"));
+			throws ServletException, IOException {
+		try {
+			String locationId = request.getParameter("id");
+			String carName = request.getParameter("carName");
+			String nameLocation = request.getParameter("nameLocation");
+			int nombreJours = Integer.parseInt(request.getParameter("nombreJours"));
+			double tauxJournalier = Double.parseDouble(request.getParameter("tauxJournalier"));
 
-	        // Créer une nouvelle instance de Location
-	        Location updatedLocation = new Location();
-	        updatedLocation.setId(locationId);
-	        updatedLocation.setCarName(carName);
-	        updatedLocation.setNameLocation(nameLocation);
-	        updatedLocation.setNombreJours(nombreJours);
-	        updatedLocation.setTauxJournalier(tauxJournalier);
+			// Créer une nouvelle instance de Location
+			Location updatedLocation = new Location();
+			updatedLocation.setId(locationId);
+			updatedLocation.setCarName(carName);
+			updatedLocation.setNameLocation(nameLocation);
+			updatedLocation.setNombreJours(nombreJours);
+			updatedLocation.setTauxJournalier(tauxJournalier);
 
-	        // Mettre à jour la Location dans le modèle
-	        LocationModel.updateLocation(updatedLocation);
+			// Mettre à jour la Location dans le modèle
+			LocationModel.updateLocation(updatedLocation);
 
-	        // Envoyer une réponse de succès
-	        ResponseApi successResponse = new ResponseApi("La location a été mise à jour avec succès.", 200, "Success");
-	        request.getSession().setAttribute("responseApi", successResponse);
-	        // Rediriger pour afficher toutes les Locations
-	        response.sendRedirect(request.getContextPath() + "/app");
-	    } catch (NumberFormatException e) {
-	        // Envoyer une réponse d'erreur si quelque chose se passe mal
-	        ResponseApi errorResponse = new ResponseApi(
-	                "Une erreur s'est produite lors de la mise à jour de la Location.", 500, "Error");
-	        request.getSession().setAttribute("responseApi", errorResponse);
-	        response.sendRedirect(request.getContextPath() + "/app");
-	    }
+			// Envoyer une réponse de succès
+			ResponseApi successResponse = new ResponseApi("La location a été mise à jour avec succès.", 200, "Success");
+			request.getSession().setAttribute("responseApi", successResponse);
+			// Rediriger pour afficher toutes les Locations
+			response.sendRedirect(request.getContextPath() + "/app");
+		} catch (NumberFormatException e) {
+			// Envoyer une réponse d'erreur si quelque chose se passe mal
+			ResponseApi errorResponse = new ResponseApi(
+					"Une erreur s'est produite lors de la mise à jour de la Location.", 500, "Error");
+			request.getSession().setAttribute("responseApi", errorResponse);
+			response.sendRedirect(request.getContextPath() + "/app");
+		}
 	}
-
 
 //	private void sendJsonResponse(HttpServletResponse response, ResponseApi responseObject) throws IOException {
 //	    response.setContentType("application/json");

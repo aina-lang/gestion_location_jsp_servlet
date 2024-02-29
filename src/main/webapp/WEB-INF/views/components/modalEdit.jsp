@@ -46,19 +46,21 @@
 
 <script>
     const modal1 = document.getElementById("modal-background") ?? null;
-    const openModalBtn1 = document.getElementById("openModalBtn") ?? null;
+
     const closeModalBtn1 = document.getElementById("closeModalBtn") ?? null;
 
-    if (modal1 && openModalBtn1 && closeModalBtn1) {
-        openModalBtn1.addEventListener('click', () => {
-            modal1.classList.remove('hidden');
-        });
+	console.log(openModalBtn1, closeModalBtn1,modal1 );
+	   
+    
+    if (modal1  && closeModalBtn1) {
+     
         modal1.addEventListener('click', (event) => {
             if (event.target === modal1) {
                 modal1.classList.add('hidden');
             }
         });
         closeModalBtn1.addEventListener('click', () => {
+        
             modal1.classList.add('hidden');
         });
     }
@@ -70,22 +72,22 @@
 
 
     function openUpdateModal(id, carName, nameLocation, nombreJours, tauxJournalier) {
-        const modalEdit = document.getElementById("modal-background");
+       
         const locationIdInput = document.getElementById("locationId");
         const carNameInput = document.getElementById("carName");
         const nameLocationInput = document.getElementById("nameLocation");
         const nombreJoursInput = document.getElementById("nombreJours");
         const tauxJournalierInput = document.getElementById("tauxJournalier");
 
-        // Pré-remplir les champs avec les données de la location
+
         locationIdInput.value = id;
         carNameInput.value = carName;
         nameLocationInput.value = nameLocation;
         nombreJoursInput.value = nombreJours;
         tauxJournalierInput.value = tauxJournalier;
-
-        // Ouvrir le modal
-        modalEdit.classList.remove('hidden');
+    	console.log("yess");
+   
+        modal1.classList.remove('hidden');
     }
 </script>
 
